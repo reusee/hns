@@ -35,3 +35,19 @@ func DescendantTagEq(tag string, cont WalkFunc) WalkFunc {
 		return node.Tag == tag
 	}, cont)
 }
+
+func Children(predict func(*WalkCtx, *Node) bool, cont WalkFunc) WalkFunc {
+	return func(ctx *WalkCtx, node *Node) {
+		for _, child := range node.Children {
+			if predict(ctx, child) {
+				cont(ctx, child)
+			}
+		}
+	}
+}
+
+func ChildrenTagEq(tag string, cont WalkFunc) WalkFunc {
+	return Children(func(_ *WalkCtx, node *Node) bool {
+		return node.Tag == tag
+	}, cont)
+}

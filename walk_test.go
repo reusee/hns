@@ -9,6 +9,9 @@ func TestWalk(t *testing.T) {
 	<p>bar</p>
 	<p>baz</p>
 	<a>foo</a>
+	<div>
+		<a>bar</a>
+	</div>
 </div>
 	`)
 	if err != nil {
@@ -23,9 +26,23 @@ func TestWalk(t *testing.T) {
 					res = append(res, node)
 				}))))
 	if len(res) != 3 {
-		t.Fatalf("result not match")
+		t.Fatalf("p result not match")
 	}
 	if res[0].Text != "foo" || res[1].Text != "bar" || res[2].Text != "baz" {
-		t.Fatalf("result error")
+		t.Fatalf("p result error")
+	}
+
+	res = res[:0]
+	root.Walk(
+		ChildrenTagEq("div",
+			ChildrenTagEq("a",
+				Do(func(n *Node) {
+					res = append(res, n)
+				}))))
+	if len(res) != 1 {
+		t.Fatalf("a result not match")
+	}
+	if res[0].Text != "foo" {
+		t.Fatalf("a result error")
 	}
 }
