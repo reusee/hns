@@ -36,6 +36,12 @@ func DescendantTagEq(tag string, cont WalkFunc) WalkFunc {
 	}, cont)
 }
 
+func DescendantIdEq(id string, cont WalkFunc) WalkFunc {
+	return Descendant(func(_ *WalkCtx, node *Node) bool {
+		return node.Attr["id"] == id
+	}, cont)
+}
+
 func Children(predict func(*WalkCtx, *Node) bool, cont WalkFunc) WalkFunc {
 	return func(ctx *WalkCtx, node *Node) {
 		for _, child := range node.Children {
