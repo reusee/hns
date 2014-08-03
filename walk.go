@@ -26,10 +26,11 @@ func Return(ctx *WalkCtx, node *Node) {
 
 // scope
 
-type ScopeCombinator func(func(*WalkCtx, *Node) bool, WalkFunc) WalkFunc
+type WalkPredict func(*WalkCtx, *Node) bool
+type ScopeCombinator func(WalkPredict, WalkFunc) WalkFunc
 
-func Descendant(predict func(*WalkCtx, *Node) bool, cont WalkFunc) WalkFunc {
-	var f func(*WalkCtx, *Node)
+func Descendant(predict WalkPredict, cont WalkFunc) WalkFunc {
+	var f WalkFunc
 	f = func(ctx *WalkCtx, node *Node) {
 		for _, child := range node.Children {
 			if predict(ctx, child) {
@@ -42,8 +43,8 @@ func Descendant(predict func(*WalkCtx, *Node) bool, cont WalkFunc) WalkFunc {
 	return f
 }
 
-func AllDescendant(predict func(*WalkCtx, *Node) bool, cont WalkFunc) WalkFunc {
-	var f func(*WalkCtx, *Node)
+func AllDescendant(predict WalkPredict, cont WalkFunc) WalkFunc {
+	var f WalkFunc
 	f = func(ctx *WalkCtx, node *Node) {
 		for _, child := range node.Children {
 			if predict(ctx, child) {
@@ -55,7 +56,7 @@ func AllDescendant(predict func(*WalkCtx, *Node) bool, cont WalkFunc) WalkFunc {
 	return f
 }
 
-func Children(predict func(*WalkCtx, *Node) bool, cont WalkFunc) WalkFunc {
+func Children(predict WalkPredict, cont WalkFunc) WalkFunc {
 	return func(ctx *WalkCtx, node *Node) {
 		for _, child := range node.Children {
 			if predict(ctx, child) {
