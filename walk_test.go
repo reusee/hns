@@ -4,16 +4,17 @@ import "testing"
 
 func TestWalk(t *testing.T) {
 	root, err := ParseString(`
-<div id="1" bar="bar">
+<div id="1" bar="bar" class="div foo">
 	<p id="1a" foo="foo">foo</p>
 	<p id="1b" foo="foo">bar</p>
 	<p id="1c">baz</p>
 	<a id="1d">foo</a>
-	<div id="foo" bar="bar">
+	<div id="foo" bar="bar" class="bar div ">
 		<a id="div-a" bar="bar">bar</a>
 	</div>
+	<ul class="list"></ul>
 </div>
-<ul id="u" bar="BAR"></ul>
+<ul id="u" bar="BAR" class="list"></ul>
 	`)
 	if err != nil {
 		t.Fatal(err)
@@ -92,13 +93,13 @@ func TestWalk(t *testing.T) {
 	if len(res) != 2 {
 		t.Fatalf("Return reuslt not match")
 	}
-	if len(res[0].Children) != 5 || len(res[1].Children) != 1 {
+	if len(res[0].Children) != 6 || len(res[1].Children) != 1 {
 		t.Fatalf("Return result error")
 	}
 
 	// TagMatch
 	res = root.Walk(DescendantTagMatch("p|ul", Return)).Return
-	if len(res) != 4 || res[0].Tag != "p" || res[1].Tag != "p" || res[2].Tag != "p" || res[3].Tag != "ul" {
+	if len(res) != 5 || res[0].Tag != "p" || res[1].Tag != "p" || res[2].Tag != "p" || res[3].Tag != "ul" || res[4].Tag != "ul" {
 		t.Fatalf("DescendantTagMatch result error")
 	}
 	res = root.Walk(AllDescendantTagMatch("div|a", Return)).Return
@@ -151,5 +152,19 @@ func TestWalk(t *testing.T) {
 	res = root.Walk(ChildrenAttrMatch("bar", "bar", Return)).Return
 	if len(res) != 1 || res[0].Id != "1" {
 		t.Fatalf("ChildrenAttrMatch result error")
+	}
+
+	// ClassEq
+	res = root.Walk(DescendantClassEq("foo", Return)).Return
+	if len(res) != 1 || res[0].Id != "1" {
+		t.Fatalf("DescendantClassEq result error")
+	}
+	res = root.Walk(AllDescendantClassEq("div", Return)).Return
+	if len(res) != 2 || res[0].Id != "1" || res[1].Id != "foo" {
+		t.Fatalf("AllDescendantClassEq result error")
+	}
+	res = root.Walk(ChildrenClassEq("list", Return)).Return
+	if len(res) != 1 || res[0].Id != "u" {
+		t.Fatalf("ChildrenClassEq result error")
 	}
 }
