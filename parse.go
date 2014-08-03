@@ -91,3 +91,7 @@ parse:
 
 	return root, nil
 }
+
+func ParseString(s string) (*Node, error) {
+	return Parse(strings.NewReader(s))
+}
