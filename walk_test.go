@@ -45,4 +45,17 @@ func TestWalk(t *testing.T) {
 	if res[0].Text != "foo" {
 		t.Fatalf("a result error")
 	}
+
+	res = res[:0]
+	root.Walk(Descendant(func(_ *WalkCtx, node *Node) bool {
+		return node.Tag == "a" && node.Text == "bar"
+	}, Do(func(node *Node) {
+		res = append(res, node)
+	})))
+	if len(res) != 1 {
+		t.Fatalf("abar result not match")
+	}
+	if res[0].Parent.Tag != "div" {
+		t.Fatalf("abar result error")
+	}
 }
