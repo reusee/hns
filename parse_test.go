@@ -55,6 +55,16 @@ func TestParse(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
+
+	if root.Index() != -1 {
+		t.Fatalf("ROOT index is not -1")
+	}
+	if root.Children[0].Index() != 0 {
+		t.Fatalf("div index is not 0")
+	}
+	if root.Children[0].Children[1].Index() != 1 {
+		t.Fatalf("img index is not 1")
+	}
 }
 
 func TestParseError(t *testing.T) {

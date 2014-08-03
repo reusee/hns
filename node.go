@@ -62,3 +62,16 @@ func (n *Node) Compare(right *Node) error {
 	}
 	return nil
 }
+
+func (n *Node) Index() (ret int) {
+	ret = -1
+	if n.Parent != nil {
+		for i, node := range n.Parent.Children {
+			if n == node {
+				ret = i
+				break
+			}
+		}
+	}
+	return
+}
