@@ -13,6 +13,7 @@ func TestWalk(t *testing.T) {
 		<a>bar</a>
 	</div>
 </div>
+<ul id="u"></ul>
 	`)
 	if err != nil {
 		t.Fatal(err)
@@ -33,6 +34,18 @@ func TestWalk(t *testing.T) {
 		t.Fatalf("DescendantTagEq result error")
 	}
 
+	// DescendantIdEq
+	res = res[:0]
+	root.Walk(DescendantIdEq("foo", Do(func(node *Node) {
+		res = append(res, node)
+	})))
+	if len(res) != 1 {
+		t.Fatalf("DescendantIdEq result not match")
+	}
+	if res[0].Tag != "div" || len(res[0].Children) != 1 {
+		t.Fatalf("DescendantIdEq result error")
+	}
+
 	// ChildrenTagEq
 	res = res[:0]
 	root.Walk(
@@ -46,6 +59,12 @@ func TestWalk(t *testing.T) {
 	}
 	if res[0].Text != "foo" {
 		t.Fatalf("ChildrenTagEq result error")
+	}
+
+	// ChildrenIdEq
+	res = root.Walk(ChildrenIdEq("u", Return))
+	if len(res) != 1 || res[0].Tag != "ul" {
+		t.Fatalf("ChildrenIdEq result error")
 	}
 
 	// Descendant
@@ -62,15 +81,12 @@ func TestWalk(t *testing.T) {
 		t.Fatalf("Descendant result error")
 	}
 
-	// DescendantIdEq
-	res = res[:0]
-	root.Walk(DescendantIdEq("foo", Do(func(node *Node) {
-		res = append(res, node)
-	})))
-	if len(res) != 1 {
-		t.Fatalf("DescendantIdEq result not match")
+	// Return and AllDescendantTagEq
+	res = root.Walk(AllDescendantTagEq("div", Return))
+	if len(res) != 2 {
+		t.Fatalf("Return reuslt not match")
 	}
-	if res[0].Tag != "div" || len(res[0].Children) != 1 {
-		t.Fatalf("DescendantIdEq result error")
+	if len(res[0].Children) != 5 || len(res[1].Children) != 1 {
+		t.Fatalf("Return result error")
 	}
 }
