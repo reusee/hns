@@ -89,18 +89,25 @@ func IdEq(scope ScopeCombinator, id string, cont WalkFunc) WalkFunc {
 	}, cont)
 }
 
+func IdMatch(scope ScopeCombinator, pattern string, cont WalkFunc) WalkFunc {
+	p := regexp.MustCompile(pattern)
+	return scope(func(_ *WalkCtx, node *Node) bool {
+		return p.MatchString(node.Attr["id"])
+	}, cont)
+}
+
 // scope X member
 
 func DescendantTagEq(tag string, cont WalkFunc) WalkFunc {
 	return TagEq(Descendant, tag, cont)
 }
 
-func DescendantIdEq(id string, cont WalkFunc) WalkFunc {
-	return IdEq(Descendant, id, cont)
-}
-
 func AllDescendantTagEq(tag string, cont WalkFunc) WalkFunc {
 	return TagEq(AllDescendant, tag, cont)
+}
+
+func ChildrenTagEq(tag string, cont WalkFunc) WalkFunc {
+	return TagEq(Children, tag, cont)
 }
 
 func DescendantTagMatch(pattern string, cont WalkFunc) WalkFunc {
@@ -115,12 +122,24 @@ func ChildrenTagMatch(pattern string, cont WalkFunc) WalkFunc {
 	return TagMatch(Children, pattern, cont)
 }
 
-// no need for AllDescendantIdEq
-
-func ChildrenTagEq(tag string, cont WalkFunc) WalkFunc {
-	return TagEq(Children, tag, cont)
+func DescendantIdEq(id string, cont WalkFunc) WalkFunc {
+	return IdEq(Descendant, id, cont)
 }
+
+// no need for AllDescendantIdEq
 
 func ChildrenIdEq(id string, cont WalkFunc) WalkFunc {
 	return IdEq(Children, id, cont)
+}
+
+func DescendantIdMatch(pattern string, cont WalkFunc) WalkFunc {
+	return IdMatch(Descendant, pattern, cont)
+}
+
+func AllDescendantIdMatch(pattern string, cont WalkFunc) WalkFunc {
+	return IdMatch(AllDescendant, pattern, cont)
+}
+
+func ChildrenIdMatch(pattern string, cont WalkFunc) WalkFunc {
+	return IdMatch(Children, pattern, cont)
 }

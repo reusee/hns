@@ -104,4 +104,18 @@ func TestWalk(t *testing.T) {
 	if len(res) != 2 || res[0].Attr["id"] != "1" || res[1].Attr["id"] != "u" {
 		t.Fatalf("ChildrenTagMatch result error")
 	}
+
+	// IdMatch
+	res = root.Walk(DescendantIdMatch("1[a-z]+", Return))
+	if len(res) != 4 || res[0].Attr["id"] != "1a" {
+		t.Fatalf("DescendantIdMatch result error")
+	}
+	res = root.Walk(AllDescendantIdMatch("1.*", Return))
+	if len(res) != 5 || res[3].Attr["id"] != "1c" {
+		t.Fatalf("AllDescendantIdMatch result error")
+	}
+	res = root.Walk(ChildrenIdMatch(".*", Return))
+	if len(res) != 2 || res[1].Attr["id"] != "u" {
+		t.Fatalf("ChildrenIdMatch result error")
+	}
 }
