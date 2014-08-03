@@ -1,5 +1,7 @@
 package hns
 
+import "regexp"
+
 type WalkFunc func(*WalkCtx, *Node)
 
 type WalkCtx struct {
@@ -66,11 +68,18 @@ func Children(predict WalkPredict, cont WalkFunc) WalkFunc {
 	}
 }
 
-// tag, class, id, attr
+// member: tag, class, id, attr
 
 func TagEq(scope ScopeCombinator, tag string, cont WalkFunc) WalkFunc {
 	return scope(func(_ *WalkCtx, node *Node) bool {
 		return node.Tag == tag
+	}, cont)
+}
+
+func TagMatch(scope ScopeCombinator, pattern string, cont WalkFunc) WalkFunc {
+	p := regexp.MustCompile(pattern)
+	return scope(func(_ *WalkCtx, node *Node) bool {
+		return p.MatchString(node.Tag)
 	}, cont)
 }
 
@@ -80,7 +89,7 @@ func IdEq(scope ScopeCombinator, id string, cont WalkFunc) WalkFunc {
 	}, cont)
 }
 
-// helpers
+// scope X member
 
 func DescendantTagEq(tag string, cont WalkFunc) WalkFunc {
 	return TagEq(Descendant, tag, cont)
@@ -92,6 +101,18 @@ func DescendantIdEq(id string, cont WalkFunc) WalkFunc {
 
 func AllDescendantTagEq(tag string, cont WalkFunc) WalkFunc {
 	return TagEq(AllDescendant, tag, cont)
+}
+
+func DescendantTagMatch(pattern string, cont WalkFunc) WalkFunc {
+	return TagMatch(Descendant, pattern, cont)
+}
+
+func AllDescendantTagMatch(pattern string, cont WalkFunc) WalkFunc {
+	return TagMatch(AllDescendant, pattern, cont)
+}
+
+func ChildrenTagMatch(pattern string, cont WalkFunc) WalkFunc {
+	return TagMatch(Children, pattern, cont)
 }
 
 // no need for AllDescendantIdEq

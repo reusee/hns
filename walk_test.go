@@ -4,13 +4,13 @@ import "testing"
 
 func TestWalk(t *testing.T) {
 	root, err := ParseString(`
-<div>
-	<p>foo</p>
-	<p>bar</p>
-	<p>baz</p>
-	<a>foo</a>
+<div id="1">
+	<p id="1a">foo</p>
+	<p id="1b">bar</p>
+	<p id="1c">baz</p>
+	<a id="1d">foo</a>
 	<div id="foo">
-		<a>bar</a>
+		<a id="div-a">bar</a>
 	</div>
 </div>
 <ul id="u"></ul>
@@ -88,5 +88,20 @@ func TestWalk(t *testing.T) {
 	}
 	if len(res[0].Children) != 5 || len(res[1].Children) != 1 {
 		t.Fatalf("Return result error")
+	}
+
+	// TagMatch
+	res = root.Walk(DescendantTagMatch("p|ul", Return))
+	if len(res) != 4 || res[0].Tag != "p" || res[1].Tag != "p" || res[2].Tag != "p" || res[3].Tag != "ul" {
+		t.Fatalf("DescendantTagMatch result error")
+	}
+	res = root.Walk(AllDescendantTagMatch("div|a", Return))
+	if len(res) != 4 || res[0].Tag != "div" || res[1].Tag != "a" || res[2].Tag != "div" || res[3].Tag != "a" {
+		p("%v\n", res)
+		t.Fatalf("AllDescendantTagMatch result error")
+	}
+	res = root.Walk(ChildrenTagMatch("div|ul", Return))
+	if len(res) != 2 || res[0].Attr["id"] != "1" || res[1].Attr["id"] != "u" {
+		t.Fatalf("ChildrenTagMatch result error")
 	}
 }
