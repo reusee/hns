@@ -62,7 +62,7 @@ func TestWalk(t *testing.T) {
 	}
 
 	// ChildrenIdEq
-	res = root.Walk(ChildrenIdEq("u", Return))
+	res = root.Walk(ChildrenIdEq("u", Return)).Return
 	if len(res) != 1 || res[0].Tag != "ul" {
 		t.Fatalf("ChildrenIdEq result error")
 	}
@@ -82,7 +82,7 @@ func TestWalk(t *testing.T) {
 	}
 
 	// Return and AllDescendantTagEq
-	res = root.Walk(AllDescendantTagEq("div", Return))
+	res = root.Walk(AllDescendantTagEq("div", Return)).Return
 	if len(res) != 2 {
 		t.Fatalf("Return reuslt not match")
 	}
@@ -91,30 +91,30 @@ func TestWalk(t *testing.T) {
 	}
 
 	// TagMatch
-	res = root.Walk(DescendantTagMatch("p|ul", Return))
+	res = root.Walk(DescendantTagMatch("p|ul", Return)).Return
 	if len(res) != 4 || res[0].Tag != "p" || res[1].Tag != "p" || res[2].Tag != "p" || res[3].Tag != "ul" {
 		t.Fatalf("DescendantTagMatch result error")
 	}
-	res = root.Walk(AllDescendantTagMatch("div|a", Return))
+	res = root.Walk(AllDescendantTagMatch("div|a", Return)).Return
 	if len(res) != 4 || res[0].Tag != "div" || res[1].Tag != "a" || res[2].Tag != "div" || res[3].Tag != "a" {
 		p("%v\n", res)
 		t.Fatalf("AllDescendantTagMatch result error")
 	}
-	res = root.Walk(ChildrenTagMatch("div|ul", Return))
+	res = root.Walk(ChildrenTagMatch("div|ul", Return)).Return
 	if len(res) != 2 || res[0].Attr["id"] != "1" || res[1].Attr["id"] != "u" {
 		t.Fatalf("ChildrenTagMatch result error")
 	}
 
 	// IdMatch
-	res = root.Walk(DescendantIdMatch("1[a-z]+", Return))
+	res = root.Walk(DescendantIdMatch("1[a-z]+", Return)).Return
 	if len(res) != 4 || res[0].Attr["id"] != "1a" {
 		t.Fatalf("DescendantIdMatch result error")
 	}
-	res = root.Walk(AllDescendantIdMatch("1.*", Return))
+	res = root.Walk(AllDescendantIdMatch("1.*", Return)).Return
 	if len(res) != 5 || res[3].Attr["id"] != "1c" {
 		t.Fatalf("AllDescendantIdMatch result error")
 	}
-	res = root.Walk(ChildrenIdMatch(".*", Return))
+	res = root.Walk(ChildrenIdMatch(".*", Return)).Return
 	if len(res) != 2 || res[1].Attr["id"] != "u" {
 		t.Fatalf("ChildrenIdMatch result error")
 	}

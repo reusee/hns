@@ -8,10 +8,10 @@ type WalkCtx struct {
 	Return []*Node
 }
 
-func (n *Node) Walk(fn WalkFunc) []*Node {
+func (n *Node) Walk(fn WalkFunc) *WalkCtx {
 	ctx := &WalkCtx{}
 	fn(ctx, n)
-	return ctx.Return
+	return ctx
 }
 
 // utils
