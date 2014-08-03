@@ -67,6 +67,12 @@ func TestWalk(t *testing.T) {
 		t.Fatalf("ChildrenIdEq result error")
 	}
 
+	// AllDescendantIdEq
+	res = root.Walk(AllDescendantIdEq("1c", Return)).Return
+	if len(res) != 1 || res[0].Tag != "p" {
+		t.Fatalf("AllDescendantIdEq result error")
+	}
+
 	// Descendant
 	res = res[:0]
 	root.Walk(Descendant(func(_ *WalkCtx, node *Node) bool {

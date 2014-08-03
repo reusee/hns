@@ -126,7 +126,9 @@ func DescendantIdEq(id string, cont WalkFunc) WalkFunc {
 	return IdEq(Descendant, id, cont)
 }
 
-// no need for AllDescendantIdEq
+func AllDescendantIdEq(id string, cont WalkFunc) WalkFunc {
+	return IdEq(AllDescendant, id, cont)
+}
 
 func ChildrenIdEq(id string, cont WalkFunc) WalkFunc {
 	return IdEq(Children, id, cont)
