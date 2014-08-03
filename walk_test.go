@@ -138,4 +138,18 @@ func TestWalk(t *testing.T) {
 	if len(res) != 1 || res[0].Id() != "1" {
 		t.Fatalf("ChildrenAttrEq result error")
 	}
+
+	// AttrMatch
+	res = root.Walk(DescendantAttrMatch("foo", "foo", Return)).Return
+	if len(res) != 2 || res[0].Attr["id"] != "1a" || res[1].Attr["id"] != "1b" {
+		t.Fatalf("DescendantAttrMatch result error")
+	}
+	res = root.Walk(AllDescendantAttrMatch("bar", "bar", Return)).Return
+	if len(res) != 3 || res[0].Id() != "1" || res[1].Id() != "foo" || res[2].Id() != "div-a" {
+		t.Fatalf("AllDescendantAttrMatch result error")
+	}
+	res = root.Walk(ChildrenAttrMatch("bar", "bar", Return)).Return
+	if len(res) != 1 || res[0].Id() != "1" {
+		t.Fatalf("ChildrenAttrMatch result error")
+	}
 }
