@@ -75,3 +75,7 @@ func (n *Node) Index() (ret int) {
 	}
 	return
 }
+
+func (n *Node) Id() string {
+	return n.Attr["id"]
+}

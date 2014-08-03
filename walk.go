@@ -68,7 +68,7 @@ func Children(predict WalkPredict, cont WalkFunc) WalkFunc {
 	}
 }
 
-// member: tag, class, id, attr
+// member: tag, id, attr, class
 
 func TagEq(scope ScopeCombinator, tag string, cont WalkFunc) WalkFunc {
 	return scope(func(_ *WalkCtx, node *Node) bool {
@@ -93,6 +93,12 @@ func IdMatch(scope ScopeCombinator, pattern string, cont WalkFunc) WalkFunc {
 	p := regexp.MustCompile(pattern)
 	return scope(func(_ *WalkCtx, node *Node) bool {
 		return p.MatchString(node.Attr["id"])
+	}, cont)
+}
+
+func AttrEq(scope ScopeCombinator, key, value string, cont WalkFunc) WalkFunc {
+	return scope(func(_ *WalkCtx, node *Node) bool {
+		return node.Attr[key] == value
 	}, cont)
 }
 
@@ -144,4 +150,16 @@ func AllDescendantIdMatch(pattern string, cont WalkFunc) WalkFunc {
 
 func ChildrenIdMatch(pattern string, cont WalkFunc) WalkFunc {
 	return IdMatch(Children, pattern, cont)
+}
+
+func DescendantAttrEq(key, value string, cont WalkFunc) WalkFunc {
+	return AttrEq(Descendant, key, value, cont)
+}
+
+func AllDescendantAttrEq(key, value string, cont WalkFunc) WalkFunc {
+	return AttrEq(AllDescendant, key, value, cont)
+}
+
+func ChildrenAttrEq(key, value string, cont WalkFunc) WalkFunc {
+	return AttrEq(Children, key, value, cont)
 }

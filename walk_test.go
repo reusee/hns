@@ -4,16 +4,16 @@ import "testing"
 
 func TestWalk(t *testing.T) {
 	root, err := ParseString(`
-<div id="1">
-	<p id="1a">foo</p>
-	<p id="1b">bar</p>
+<div id="1" bar="bar">
+	<p id="1a" foo="foo">foo</p>
+	<p id="1b" foo="foo">bar</p>
 	<p id="1c">baz</p>
 	<a id="1d">foo</a>
-	<div id="foo">
-		<a id="div-a">bar</a>
+	<div id="foo" bar="bar">
+		<a id="div-a" bar="bar">bar</a>
 	</div>
 </div>
-<ul id="u"></ul>
+<ul id="u" bar="BAR"></ul>
 	`)
 	if err != nil {
 		t.Fatal(err)
@@ -123,5 +123,19 @@ func TestWalk(t *testing.T) {
 	res = root.Walk(ChildrenIdMatch(".*", Return)).Return
 	if len(res) != 2 || res[1].Attr["id"] != "u" {
 		t.Fatalf("ChildrenIdMatch result error")
+	}
+
+	// AttrEq
+	res = root.Walk(DescendantAttrEq("foo", "foo", Return)).Return
+	if len(res) != 2 || res[0].Attr["id"] != "1a" || res[1].Attr["id"] != "1b" {
+		t.Fatalf("DescendantAttrEq result error")
+	}
+	res = root.Walk(AllDescendantAttrEq("bar", "bar", Return)).Return
+	if len(res) != 3 || res[0].Id() != "1" || res[1].Id() != "foo" || res[2].Id() != "div-a" {
+		t.Fatalf("AllDescendantAttrEq result error")
+	}
+	res = root.Walk(ChildrenAttrEq("bar", "bar", Return)).Return
+	if len(res) != 1 || res[0].Id() != "1" {
+		t.Fatalf("ChildrenAttrEq result error")
 	}
 }
