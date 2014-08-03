@@ -16,11 +16,11 @@ func Do(fn func(*Node)) WalkFunc {
 	}
 }
 
-func Descendant(predict func(*Node) bool, cont WalkFunc) WalkFunc {
+func Descendant(predict func(*WalkCtx, *Node) bool, cont WalkFunc) WalkFunc {
 	var f func(*WalkCtx, *Node)
 	f = func(ctx *WalkCtx, node *Node) {
 		for _, child := range node.Children {
-			if predict(child) {
+			if predict(ctx, child) {
 				cont(ctx, child)
 			} else {
 				f(ctx, child)
@@ -31,7 +31,7 @@ func Descendant(predict func(*Node) bool, cont WalkFunc) WalkFunc {
 }
 
 func DescendantTagEq(tag string, cont WalkFunc) WalkFunc {
-	return Descendant(func(node *Node) bool {
+	return Descendant(func(_ *WalkCtx, node *Node) bool {
 		return node.Tag == tag
 	}, cont)
 }
