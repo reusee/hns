@@ -131,11 +131,11 @@ func TestWalk(t *testing.T) {
 		t.Fatalf("DescendantAttrEq result error")
 	}
 	res = root.Walk(AllDescendantAttrEq("bar", "bar", Return)).Return
-	if len(res) != 3 || res[0].Id() != "1" || res[1].Id() != "foo" || res[2].Id() != "div-a" {
+	if len(res) != 3 || res[0].Id != "1" || res[1].Id != "foo" || res[2].Id != "div-a" {
 		t.Fatalf("AllDescendantAttrEq result error")
 	}
 	res = root.Walk(ChildrenAttrEq("bar", "bar", Return)).Return
-	if len(res) != 1 || res[0].Id() != "1" {
+	if len(res) != 1 || res[0].Id != "1" {
 		t.Fatalf("ChildrenAttrEq result error")
 	}
 
@@ -145,11 +145,11 @@ func TestWalk(t *testing.T) {
 		t.Fatalf("DescendantAttrMatch result error")
 	}
 	res = root.Walk(AllDescendantAttrMatch("bar", "bar", Return)).Return
-	if len(res) != 3 || res[0].Id() != "1" || res[1].Id() != "foo" || res[2].Id() != "div-a" {
+	if len(res) != 3 || res[0].Id != "1" || res[1].Id != "foo" || res[2].Id != "div-a" {
 		t.Fatalf("AllDescendantAttrMatch result error")
 	}
 	res = root.Walk(ChildrenAttrMatch("bar", "bar", Return)).Return
-	if len(res) != 1 || res[0].Id() != "1" {
+	if len(res) != 1 || res[0].Id != "1" {
 		t.Fatalf("ChildrenAttrMatch result error")
 	}
 }

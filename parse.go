@@ -57,6 +57,7 @@ parse:
 					currentNode.Attr[string(key)] = string(val)
 				}
 			}
+			currentNode.collectIdAndClass()
 		case html.EndTagToken:
 			name, _ := tokenizer.TagName()
 			if string(name) != currentNode.Tag { // tag mismatched
@@ -81,6 +82,7 @@ parse:
 					node.Attr[string(key)] = string(val)
 				}
 			}
+			node.collectIdAndClass()
 			currentNode.Children = append(currentNode.Children, node)
 			writeRaw()
 		case html.CommentToken:
@@ -90,6 +92,17 @@ parse:
 	root.Raw = string(root.rawBuf.Bytes())
 
 	return root, nil
+}
+
+func (n *Node) collectIdAndClass() {
+	// id and class
+	n.Id = n.Attr["id"]
+	for _, class := range strings.Split(n.Attr["class"], " ") {
+		class = strings.TrimSpace(class)
+		if len(class) > 0 {
+			n.Class = append(n.Class, class)
+		}
+	}
 }
 
 func ParseString(s string) (*Node, error) {

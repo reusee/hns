@@ -14,6 +14,9 @@ type Node struct {
 	TextParts []string
 	Attr      map[string]string
 
+	Id    string
+	Class []string
+
 	Raw    string
 	rawBuf *bytes.Buffer
 }
@@ -74,8 +77,4 @@ func (n *Node) Index() (ret int) {
 		}
 	}
 	return
-}
-
-func (n *Node) Id() string {
-	return n.Attr["id"]
 }
