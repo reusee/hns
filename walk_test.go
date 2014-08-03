@@ -12,7 +12,7 @@ func TestWalk(t *testing.T) {
 	<div id="foo" bar="bar" class="bar div ">
 		<a id="div-a" bar="bar">bar</a>
 	</div>
-	<ul class="list"></ul>
+	<ul class="list" id="uu"></ul>
 </div>
 <ul id="u" bar="BAR" class="list"></ul>
 	`)
@@ -166,5 +166,19 @@ func TestWalk(t *testing.T) {
 	res = root.Walk(Children(ClassEq("list"), Return)).Return
 	if len(res) != 1 || res[0].Id != "u" {
 		t.Fatalf("ChildrenClassEq result error")
+	}
+
+	// ClassMatch
+	res = root.Walk(Descendant(ClassMatch("bar|list"), Return)).Return
+	if len(res) != 3 || res[0].Id != "foo" || res[1].Id != "uu" || res[2].Id != "u" {
+		t.Fatalf("DescendantClassMatch result error")
+	}
+	res = root.Walk(AllDescendant(ClassMatch("foo|bar|list"), Return)).Return
+	if len(res) != 4 || res[0].Id != "1" || res[1].Id != "foo" || res[2].Id != "uu" || res[3].Id != "u" {
+		t.Fatalf("AllDescendantClassMatch result error")
+	}
+	res = root.Walk(Children(ClassMatch("list"), Return)).Return
+	if len(res) != 1 || res[0].Id != "u" {
+		t.Fatalf("ChildrenClassMatch result error")
 	}
 }

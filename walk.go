@@ -101,8 +101,8 @@ func AttrEq(key, value string) WalkPredict {
 	}
 }
 
-func AttrMatch(key, value string) WalkPredict {
-	p := regexp.MustCompile(value)
+func AttrMatch(key, pattern string) WalkPredict {
+	p := regexp.MustCompile(pattern)
 	return func(_ *WalkCtx, node *Node) bool {
 		return p.MatchString(node.Attr[key])
 	}
@@ -112,6 +112,18 @@ func ClassEq(class string) WalkPredict {
 	return func(_ *WalkCtx, node *Node) bool {
 		for _, c := range node.Class {
 			if c == class {
+				return true
+			}
+		}
+		return false
+	}
+}
+
+func ClassMatch(pattern string) WalkPredict {
+	p := regexp.MustCompile(pattern)
+	return func(_ *WalkCtx, node *Node) bool {
+		for _, c := range node.Class {
+			if p.MatchString(c) {
 				return true
 			}
 		}
