@@ -26,6 +26,16 @@ func Return(ctx *WalkCtx, node *Node) {
 	ctx.Return = append(ctx.Return, node)
 }
 
+func Multi(funcs ...WalkFunc) WalkFunc {
+	return func(ctx *WalkCtx, node *Node) {
+		for _, f := range funcs {
+			f(ctx, node)
+		}
+	}
+}
+
+//TODO DoThen ReturnThen
+
 // scope combinators
 
 func Descendant(predict WalkPredict, cont WalkFunc) WalkFunc {
@@ -64,6 +74,16 @@ func Children(predict WalkPredict, cont WalkFunc) WalkFunc {
 		}
 	}
 }
+
+func Current(predict WalkPredict, cont WalkFunc) WalkFunc {
+	return func(ctx *WalkCtx, node *Node) {
+		if predict(ctx, node) {
+			cont(ctx, node)
+		}
+	}
+}
+
+//TODO Siblings SiblingsBefore SiblingsAfter
 
 // predicts
 

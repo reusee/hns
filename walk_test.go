@@ -181,4 +181,15 @@ func TestWalk(t *testing.T) {
 	if len(res) != 1 || res[0].Id != "u" {
 		t.Fatalf("ChildrenClassMatch result error")
 	}
+
+	// Multi and Current
+	res = root.Walk(Descendant(TagEq("div"), Multi(
+		Children(TagEq("p"), Return),
+		Children(TagEq("a"), Return),
+		Children(TagEq("ul"), Return),
+		Children(TagEq("div"), Current(AttrEq("bar", "bar"), Return)),
+	))).Return
+	if len(res) != 6 || res[0].Id != "1a" || res[3].Id != "1d" || res[5].Id != "foo" {
+		t.Fatal()
+	}
 }
