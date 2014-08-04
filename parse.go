@@ -60,8 +60,12 @@ parse:
 			currentNode.collectIdAndClass()
 		case html.EndTagToken:
 			name, _ := tokenizer.TagName()
-			if string(name) != currentNode.Tag { // tag mismatched
-				return nil, fmt.Errorf("end tag mismatched, expected %s, got %s", currentNode.Tag, name)
+			for string(name) != currentNode.Tag { // skip mismatched tag
+				currentNode.Raw = string(currentNode.rawBuf.Bytes())
+				currentNode = currentNode.Parent
+				if currentNode == nil {
+					return nil, fmt.Errorf("start tag not found for end tag %s", name)
+				}
 			}
 			writeRaw()
 			currentNode.Raw = string(currentNode.rawBuf.Bytes())
@@ -107,4 +111,8 @@ func (n *Node) collectIdAndClass() {
 
 func ParseString(s string) (*Node, error) {
 	return Parse(strings.NewReader(s))
+}
+
+func ParseBytes(bs []byte) (*Node, error) {
+	return Parse(bytes.NewReader(bs))
 }

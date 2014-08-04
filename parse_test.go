@@ -229,8 +229,39 @@ func TestParseError(t *testing.T) {
 }
 
 func TestParseTagMismatched(t *testing.T) {
-	_, err := Parse(strings.NewReader(`<div><p></div>`))
-	if err == nil || err.Error() != "end tag mismatched, expected p, got div" {
+	root, err := ParseBytes([]byte(`<div><p><a></div>`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := root.Compare(&Node{
+		Tag: "ROOT",
+		Children: []*Node{
+			{
+				Tag: "div",
+				Children: []*Node{
+					{
+						Tag: "p",
+						Raw: "<p><a>",
+						Children: []*Node{
+							{
+								Tag: "a",
+								Raw: "<a>",
+							},
+						},
+					},
+				},
+				Raw: "<div><p><a></div>",
+			},
+		},
+		Raw: `<div><p><a></div>`,
+	}); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestParseBadTag(t *testing.T) {
+	_, err := ParseString(`<p></a>`)
+	if err == nil || err.Error() != "start tag not found for end tag a" {
 		t.Fatalf("allowing tag mismatched")
 	}
 }
