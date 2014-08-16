@@ -22,6 +22,13 @@ func TestWalk(t *testing.T) {
 
 	var res []*Node
 
+	// Assign
+	var ret *Node
+	root.Walk(Assign(&ret))
+	if ret != root {
+		t.Fatal()
+	}
+
 	// DescendantTagEq
 	res = res[:0]
 	root.Walk(
