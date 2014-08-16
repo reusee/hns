@@ -1,4 +1,4 @@
-package hns
+package nw
 
 import "testing"
 
@@ -20,14 +20,16 @@ func TestWalk(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// DescendantTagEq
 	var res []*Node
+
+	// DescendantTagEq
+	res = res[:0]
 	root.Walk(
 		Descendant(TagEq("div"),
 			Descendant(TagEq("p"),
-				Do(func(node *Node) {
+				func(node *Node) {
 					res = append(res, node)
-				}))))
+				})))
 	if len(res) != 3 {
 		t.Fatalf("DescendantTagEq not match")
 	}
@@ -37,9 +39,9 @@ func TestWalk(t *testing.T) {
 
 	// DescendantIdEq
 	res = res[:0]
-	root.Walk(Descendant(IdEq("foo"), Do(func(node *Node) {
+	root.Walk(Descendant(IdEq("foo"), func(node *Node) {
 		res = append(res, node)
-	})))
+	}))
 	if len(res) != 1 {
 		t.Fatalf("DescendantIdEq result not match")
 	}
@@ -52,9 +54,9 @@ func TestWalk(t *testing.T) {
 	root.Walk(
 		Children(TagEq("div"),
 			Children(TagEq("a"),
-				Do(func(n *Node) {
+				func(n *Node) {
 					res = append(res, n)
-				}))))
+				})))
 	if len(res) != 1 {
 		t.Fatalf("ChildrenTagEq result not match")
 	}
@@ -63,24 +65,26 @@ func TestWalk(t *testing.T) {
 	}
 
 	// ChildrenIdEq
-	res = root.Walk(Children(IdEq("u"), Return)).Return
+	res = res[:0]
+	root.Walk(Children(IdEq("u"), Append(&res)))
 	if len(res) != 1 || res[0].Tag != "ul" {
 		t.Fatalf("ChildrenIdEq result error")
 	}
 
 	// AllDescendantIdEq
-	res = root.Walk(AllDescendant(IdEq("1c"), Return)).Return
+	res = res[:0]
+	root.Walk(AllDescendant(IdEq("1c"), Append(&res)))
 	if len(res) != 1 || res[0].Tag != "p" {
 		t.Fatalf("AllDescendantIdEq result error")
 	}
 
 	// Descendant
 	res = res[:0]
-	root.Walk(Descendant(func(_ *WalkCtx, node *Node) bool {
+	root.Walk(Descendant(func(node *Node) bool {
 		return node.Tag == "a" && node.Text == "bar"
-	}, Do(func(node *Node) {
+	}, func(node *Node) {
 		res = append(res, node)
-	})))
+	}))
 	if len(res) != 1 {
 		t.Fatalf("Descendant result not match")
 	}
@@ -88,107 +92,127 @@ func TestWalk(t *testing.T) {
 		t.Fatalf("Descendant result error")
 	}
 
-	// Return and AllDescendantTagEq
-	res = root.Walk(AllDescendant(TagEq("div"), Return)).Return
+	// AllDescendantTagEq
+	res = res[:0]
+	root.Walk(AllDescendant(TagEq("div"), Append(&res)))
 	if len(res) != 2 {
-		t.Fatalf("Return reuslt not match")
+		t.Fatalf("reuslt not match")
 	}
 	if len(res[0].Children) != 6 || len(res[1].Children) != 1 {
-		t.Fatalf("Return result error")
+		t.Fatalf("result error")
 	}
 
 	// TagMatch
-	res = root.Walk(Descendant(TagMatch("p|ul"), Return)).Return
+	res = res[:0]
+	root.Walk(Descendant(TagMatch("p|ul"), Append(&res)))
 	if len(res) != 5 || res[0].Tag != "p" || res[1].Tag != "p" || res[2].Tag != "p" || res[3].Tag != "ul" || res[4].Tag != "ul" {
 		t.Fatalf("DescendantTagMatch result error")
 	}
-	res = root.Walk(AllDescendant(TagMatch("div|a"), Return)).Return
+	res = res[:0]
+	root.Walk(AllDescendant(TagMatch("div|a"), Append(&res)))
 	if len(res) != 4 || res[0].Tag != "div" || res[1].Tag != "a" || res[2].Tag != "div" || res[3].Tag != "a" {
 		p("%v\n", res)
 		t.Fatalf("AllDescendantTagMatch result error")
 	}
-	res = root.Walk(Children(TagMatch("div|ul"), Return)).Return
+	res = res[:0]
+	root.Walk(Children(TagMatch("div|ul"), Append(&res)))
 	if len(res) != 2 || res[0].Attr["id"] != "1" || res[1].Attr["id"] != "u" {
 		t.Fatalf("ChildrenTagMatch result error")
 	}
 
 	// IdMatch
-	res = root.Walk(Descendant(IdMatch("1[a-z]+"), Return)).Return
+	res = res[:0]
+	root.Walk(Descendant(IdMatch("1[a-z]+"), Append(&res)))
 	if len(res) != 4 || res[0].Attr["id"] != "1a" {
 		t.Fatalf("DescendantIdMatch result error")
 	}
-	res = root.Walk(AllDescendant(IdMatch("1.*"), Return)).Return
+	res = res[:0]
+	root.Walk(AllDescendant(IdMatch("1.*"), Append(&res)))
 	if len(res) != 5 || res[3].Attr["id"] != "1c" {
 		t.Fatalf("AllDescendantIdMatch result error")
 	}
-	res = root.Walk(Children(IdMatch(".*"), Return)).Return
+	res = res[:0]
+	root.Walk(Children(IdMatch(".*"), Append(&res)))
 	if len(res) != 2 || res[1].Attr["id"] != "u" {
 		t.Fatalf("ChildrenIdMatch result error")
 	}
 
 	// AttrEq
-	res = root.Walk(Descendant(AttrEq("foo", "foo"), Return)).Return
+	res = res[:0]
+	root.Walk(Descendant(AttrEq("foo", "foo"), Append(&res)))
 	if len(res) != 2 || res[0].Attr["id"] != "1a" || res[1].Attr["id"] != "1b" {
 		t.Fatalf("DescendantAttrEq result error")
 	}
-	res = root.Walk(AllDescendant(AttrEq("bar", "bar"), Return)).Return
+	res = res[:0]
+	root.Walk(AllDescendant(AttrEq("bar", "bar"), Append(&res)))
 	if len(res) != 3 || res[0].Id != "1" || res[1].Id != "foo" || res[2].Id != "div-a" {
 		t.Fatalf("AllDescendantAttrEq result error")
 	}
-	res = root.Walk(Children(AttrEq("bar", "bar"), Return)).Return
+	res = res[:0]
+	root.Walk(Children(AttrEq("bar", "bar"), Append(&res)))
 	if len(res) != 1 || res[0].Id != "1" {
 		t.Fatalf("ChildrenAttrEq result error")
 	}
 
 	// AttrMatch
-	res = root.Walk(Descendant(AttrMatch("foo", "foo"), Return)).Return
+	res = res[:0]
+	root.Walk(Descendant(AttrMatch("foo", "foo"), Append(&res)))
 	if len(res) != 2 || res[0].Attr["id"] != "1a" || res[1].Attr["id"] != "1b" {
 		t.Fatalf("DescendantAttrMatch result error")
 	}
-	res = root.Walk(AllDescendant(AttrMatch("bar", "bar"), Return)).Return
+	res = res[:0]
+	root.Walk(AllDescendant(AttrMatch("bar", "bar"), Append(&res)))
 	if len(res) != 3 || res[0].Id != "1" || res[1].Id != "foo" || res[2].Id != "div-a" {
 		t.Fatalf("AllDescendantAttrMatch result error")
 	}
-	res = root.Walk(Children(AttrMatch("bar", "bar"), Return)).Return
+	res = res[:0]
+	root.Walk(Children(AttrMatch("bar", "bar"), Append(&res)))
 	if len(res) != 1 || res[0].Id != "1" {
 		t.Fatalf("ChildrenAttrMatch result error")
 	}
 
 	// ClassEq
-	res = root.Walk(Descendant(ClassEq("foo"), Return)).Return
+	res = res[:0]
+	root.Walk(Descendant(ClassEq("foo"), Append(&res)))
 	if len(res) != 1 || res[0].Id != "1" {
 		t.Fatalf("DescendantClassEq result error")
 	}
-	res = root.Walk(AllDescendant(ClassEq("div"), Return)).Return
+	res = res[:0]
+	root.Walk(AllDescendant(ClassEq("div"), Append(&res)))
 	if len(res) != 2 || res[0].Id != "1" || res[1].Id != "foo" {
 		t.Fatalf("AllDescendantClassEq result error")
 	}
-	res = root.Walk(Children(ClassEq("list"), Return)).Return
+	res = res[:0]
+	root.Walk(Children(ClassEq("list"), Append(&res)))
 	if len(res) != 1 || res[0].Id != "u" {
 		t.Fatalf("ChildrenClassEq result error")
 	}
 
 	// ClassMatch
-	res = root.Walk(Descendant(ClassMatch("bar|list"), Return)).Return
+	res = res[:0]
+	root.Walk(Descendant(ClassMatch("bar|list"), Append(&res)))
 	if len(res) != 3 || res[0].Id != "foo" || res[1].Id != "uu" || res[2].Id != "u" {
 		t.Fatalf("DescendantClassMatch result error")
 	}
-	res = root.Walk(AllDescendant(ClassMatch("foo|bar|list"), Return)).Return
+	res = res[:0]
+	root.Walk(AllDescendant(ClassMatch("foo|bar|list"), Append(&res)))
 	if len(res) != 4 || res[0].Id != "1" || res[1].Id != "foo" || res[2].Id != "uu" || res[3].Id != "u" {
 		t.Fatalf("AllDescendantClassMatch result error")
 	}
-	res = root.Walk(Children(ClassMatch("list"), Return)).Return
+	res = res[:0]
+	root.Walk(Children(ClassMatch("list"), Append(&res)))
 	if len(res) != 1 || res[0].Id != "u" {
 		t.Fatalf("ChildrenClassMatch result error")
 	}
 
 	// Multi and Current
-	res = root.Walk(Descendant(TagEq("div"), Multi(
-		Children(TagEq("p"), Return),
-		Children(TagEq("a"), Return),
-		Children(TagEq("ul"), Return),
-		Children(TagEq("div"), Current(AttrEq("bar", "bar"), Return)),
-	))).Return
+	res = res[:0]
+	root.Walk(Descendant(TagEq("div"), Multi(
+		Children(TagEq("p"), Append(&res)),
+		Children(TagEq("a"), Append(&res)),
+		Children(TagEq("ul"), Append(&res)),
+		Children(TagEq("div"), Current(AttrEq("bar", "bar"), Append(&res))),
+	)))
 	if len(res) != 6 || res[0].Id != "1a" || res[3].Id != "1d" || res[5].Id != "foo" {
 		t.Fatal()
 	}

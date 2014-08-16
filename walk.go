@@ -1,51 +1,45 @@
-package hns
+package nw
 
 import "regexp"
 
-type WalkFunc func(*WalkCtx, *Node)
+type WalkFunc func(*Node)
 
-type WalkCtx struct {
-	Return []*Node
-}
-
-func (n *Node) Walk(fn WalkFunc) *WalkCtx {
-	ctx := &WalkCtx{}
-	fn(ctx, n)
-	return ctx
+func (n *Node) Walk(fn WalkFunc) {
+	fn(n)
 }
 
 // util combinators
 
-func Do(fn func(*Node)) WalkFunc {
-	return func(ctx *WalkCtx, node *Node) {
-		fn(node)
-	}
-}
-
-func Return(ctx *WalkCtx, node *Node) {
-	ctx.Return = append(ctx.Return, node)
-}
-
 func Multi(funcs ...WalkFunc) WalkFunc {
-	return func(ctx *WalkCtx, node *Node) {
+	return func(node *Node) {
 		for _, f := range funcs {
-			f(ctx, node)
+			f(node)
 		}
 	}
 }
 
-//TODO DoThen ReturnThen
+func Assign(p **Node) WalkFunc {
+	return func(n *Node) {
+		*p = n
+	}
+}
+
+func Append(p *[]*Node) WalkFunc {
+	return func(n *Node) {
+		*p = append(*p, n)
+	}
+}
 
 // scope combinators
 
 func Descendant(predict WalkPredict, cont WalkFunc) WalkFunc {
 	var f WalkFunc
-	f = func(ctx *WalkCtx, node *Node) {
+	f = func(node *Node) {
 		for _, child := range node.Children {
-			if predict(ctx, child) {
-				cont(ctx, child)
+			if predict(child) {
+				cont(child)
 			} else {
-				f(ctx, child)
+				f(child)
 			}
 		}
 	}
@@ -54,31 +48,31 @@ func Descendant(predict WalkPredict, cont WalkFunc) WalkFunc {
 
 func AllDescendant(predict WalkPredict, cont WalkFunc) WalkFunc {
 	var f WalkFunc
-	f = func(ctx *WalkCtx, node *Node) {
+	f = func(node *Node) {
 		for _, child := range node.Children {
-			if predict(ctx, child) {
-				cont(ctx, child)
+			if predict(child) {
+				cont(child)
 			}
-			f(ctx, child)
+			f(child)
 		}
 	}
 	return f
 }
 
 func Children(predict WalkPredict, cont WalkFunc) WalkFunc {
-	return func(ctx *WalkCtx, node *Node) {
+	return func(node *Node) {
 		for _, child := range node.Children {
-			if predict(ctx, child) {
-				cont(ctx, child)
+			if predict(child) {
+				cont(child)
 			}
 		}
 	}
 }
 
 func Current(predict WalkPredict, cont WalkFunc) WalkFunc {
-	return func(ctx *WalkCtx, node *Node) {
-		if predict(ctx, node) {
-			cont(ctx, node)
+	return func(node *Node) {
+		if predict(node) {
+			cont(node)
 		}
 	}
 }
@@ -87,49 +81,49 @@ func Current(predict WalkPredict, cont WalkFunc) WalkFunc {
 
 // predicts
 
-type WalkPredict func(*WalkCtx, *Node) bool
+type WalkPredict func(*Node) bool
 
 func TagEq(tag string) WalkPredict {
-	return func(_ *WalkCtx, node *Node) bool {
+	return func(node *Node) bool {
 		return node.Tag == tag
 	}
 }
 
 func TagMatch(pattern string) WalkPredict {
 	p := regexp.MustCompile(pattern)
-	return func(_ *WalkCtx, node *Node) bool {
+	return func(node *Node) bool {
 		return p.MatchString(node.Tag)
 	}
 }
 
 func IdEq(id string) WalkPredict {
-	return func(_ *WalkCtx, node *Node) bool {
+	return func(node *Node) bool {
 		return node.Attr["id"] == id
 	}
 }
 
 func IdMatch(pattern string) WalkPredict {
 	p := regexp.MustCompile(pattern)
-	return func(_ *WalkCtx, node *Node) bool {
+	return func(node *Node) bool {
 		return p.MatchString(node.Attr["id"])
 	}
 }
 
 func AttrEq(key, value string) WalkPredict {
-	return func(_ *WalkCtx, node *Node) bool {
+	return func(node *Node) bool {
 		return node.Attr[key] == value
 	}
 }
 
 func AttrMatch(key, pattern string) WalkPredict {
 	p := regexp.MustCompile(pattern)
-	return func(_ *WalkCtx, node *Node) bool {
+	return func(node *Node) bool {
 		return p.MatchString(node.Attr[key])
 	}
 }
 
 func ClassEq(class string) WalkPredict {
-	return func(_ *WalkCtx, node *Node) bool {
+	return func(node *Node) bool {
 		for _, c := range node.Class {
 			if c == class {
 				return true
@@ -141,7 +135,7 @@ func ClassEq(class string) WalkPredict {
 
 func ClassMatch(pattern string) WalkPredict {
 	p := regexp.MustCompile(pattern)
-	return func(_ *WalkCtx, node *Node) bool {
+	return func(node *Node) bool {
 		for _, c := range node.Class {
 			if p.MatchString(c) {
 				return true

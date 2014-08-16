@@ -1,4 +1,4 @@
-package hns
+package nw
 
 import "testing"
 
@@ -15,22 +15,28 @@ func TestCssSelector(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ret := root.Walk(Css("  div.div", Return)).Return
+	var ret []*Node
+
+	ret = ret[:0]
+	root.Walk(Css("  div.div", Append(&ret)))
 	if len(ret) != 1 || ret[0].Id != "main" {
 		t.Fatal()
 	}
 
-	ret = root.Walk(Css("div", Return)).Return
+	ret = ret[:0]
+	root.Walk(Css("div", Append(&ret)))
 	if len(ret) != 3 {
 		t.Fatal()
 	}
 
-	ret = root.Walk(Css("#bar", Return)).Return
+	ret = ret[:0]
+	root.Walk(Css("#bar", Append(&ret)))
 	if len(ret) != 1 || ret[0].Tag != "div" {
 		t.Fatal()
 	}
 
-	ret = root.Walk(Css("div.div #bar", Return)).Return
+	ret = ret[:0]
+	root.Walk(Css("div.div #bar", Append(&ret)))
 	if len(ret) != 1 || ret[0].Text != "BAR" {
 		t.Fatal()
 	}
@@ -41,10 +47,11 @@ func TestCssSelector(t *testing.T) {
 				t.Fatal()
 			}
 		}()
-		root.Walk(Css("<>", Return))
+		root.Walk(Css("<>", Append(&ret)))
 	}()
 
-	ret = root.Walk(Css("div div div", Return)).Return
+	ret = ret[:0]
+	root.Walk(Css("div div div", Append(&ret)))
 	if len(ret) != 0 {
 		t.Fatal()
 	}

@@ -1,4 +1,4 @@
-package hns
+package nw
 
 import (
 	"io"
@@ -31,6 +31,6 @@ func BenchmarkWalk(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		root.Walk(Css("a", Return))
+		root.Walk(Css("a", func(*Node) {}))
 	}
 }

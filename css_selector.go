@@ -1,4 +1,4 @@
-package hns
+package nw
 
 import (
 	"fmt"
@@ -47,7 +47,7 @@ func Css(desc string, cont WalkFunc) WalkFunc {
 				return false
 			})
 		}
-		cont = AllDescendant(func(ctx *WalkCtx, node *Node) bool {
+		cont = AllDescendant(func(node *Node) bool {
 			for _, predict := range predicts {
 				if !predict(node) {
 					return false
